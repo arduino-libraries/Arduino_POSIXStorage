@@ -1,6 +1,6 @@
 /*
 *********************************************************************************************************
-*                                         POSIXStorage Library
+*                                     Arduino_POSIXStorage Library
 *
 *                            Copyright 2023 Arduino SA. http://arduino.cc
 *

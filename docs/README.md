@@ -1,6 +1,6 @@
-# Arduino POSIXStorage Library
+# Arduino_POSIXStorage Library
 
-The Arduino POSIXStorage Library complements the POSIX storage functions already included in the Renesas core and the Arduino_USBHostMbed5 library. It also makes them available to use in sketches.
+The Arduino_POSIXStorage Library complements the POSIX storage functions already included in the Renesas core and the Arduino_USBHostMbed5 library. It also makes them available to use in sketches.
 
 The library supports and is tested on:
 - Portenta C33 with Portenta Breakout Board (SD Card and USB Thumb Drive)
@@ -15,7 +15,7 @@ The library supports and is tested on:
 For detailed information on usage, see the API and Examples sections below. This is a very basic example of how to include and use the library:
 
 ```cpp
-#include "POSIXStorage.h"
+#include "Arduino_POSIXStorage.h"
 
 void setup() {
     mount(DEV_SDCARD, FS_FAT, MNT_DEFAULT);
@@ -29,9 +29,9 @@ void loop() {
 }
 ```
 
-It is necessary to install the Arduino_USBHostMbed5 library to use POSIXStorage on Portenta H7 and Portenta Machine Control. No additional library is needed on Portenta C33.
+It is necessary to install the Arduino_USBHostMbed5 library to use Arduino_POSIXStorage on Portenta H7 and Portenta Machine Control. No additional library is needed on the Portenta C33.
 
-The library automatically detects different types of Portenta H7 / Portenta Machine Control boards. This detection should work in the absolute majority of cases, but if you have trouble with USB on the Portenta Machine control you can try to add #define AUTOMATIC_OVERRIDE_PORTENTA_MACHINE_CONTROL just before #include "POSIXStorage.h". The automatic detection should work even with custom boards, but if you have trouble with USB on a custom board, try to add #define AUTOMATIC_OVERRIDE_PORTENTA_H7 in a similar manner.
+The library automatically detects different types of Portenta H7 / Portenta Machine Control boards. This detection should work in the absolute majority of cases, but if you have trouble with USB on the Portenta Machine control you can try to add #define AUTOMATIC_OVERRIDE_PORTENTA_MACHINE_CONTROL just before #include "Arduino_POSIXStorage.h". The automatic detection should work even with custom boards, but if you have trouble with USB on a custom board, try adding #define AUTOMATIC_OVERRIDE_PORTENTA_H7 in a similar manner.
 
 ## API
 

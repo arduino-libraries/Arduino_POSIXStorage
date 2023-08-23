@@ -1,10 +1,10 @@
 /*
- * This example shows how to mount a USB thumb drive, with hotplug registration, and write to and read from a file
+ * This example shows how to mount a USB thumb drive, with hotplug registration, and write to and read from a file.
  * 
  * Original author: A. Vidstrom
  */
 
-#include "POSIXStorage.h"
+#include "Arduino_POSIXStorage.h"
 
 volatile bool usbAttached = false;
 

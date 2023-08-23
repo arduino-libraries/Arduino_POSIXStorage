@@ -1,10 +1,10 @@
 /*
- * This example shows how to mount an SD Card and write to and read from a file
+ * This example shows how to mount an SD Card and write to and read from a file.
  * 
  * Original author: A. Vidstrom
  */
 
-#include "POSIXStorage.h"
+#include "Arduino_POSIXStorage.h"
 
 void setup() {
   Serial.begin(9600);

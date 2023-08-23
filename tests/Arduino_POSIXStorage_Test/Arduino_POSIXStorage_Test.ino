@@ -8,7 +8,7 @@
  *
  */
 
-#include "POSIXStorage.h"
+#include "Arduino_POSIXStorage.h"
 
 enum TestTypes : uint8_t
 {
