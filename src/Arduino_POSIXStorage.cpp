@@ -59,12 +59,15 @@
 #if defined(ARDUINO_PORTENTA_C33)
   #include <SDCardBlockDevice.h>
   #include <UsbHostMsd.h>
-#elif defined(ARDUINO_PORTENTA_H7_M7)
-  #include <SDMMCBlockDevice.h>
+#elif defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
   #include <Arduino_USBHostMbed5.h>
   #include <BlockDevice.h>
   // Necessary for Portenta Machine Control detection
   #include <DigitalIn.h>
+
+
+#elif defined(ARDUINO_PORTENTA_H7_M7) || ! defined(ARDUINO_OPTA)
+  #include <SDMMCBlockDevice.h>
 #else
   #error "The POSIXStorage library does not support this board"
 #endif
@@ -75,7 +78,7 @@
 *********************************************************************************************************
 */
 
-#if defined(ARDUINO_PORTENTA_H7_M7)
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
   using mbed::BlockDevice;
   using mbed::FileSystem;
 #endif
@@ -142,7 +145,7 @@ bool runningOnMachineControl = false;
 namespace {
 
 // This detection code only works on the Portenta H7 boards -->
-#if defined(ARDUINO_PORTENTA_H7_M7)
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
 
 // WARNING: This algorithm has been tested for radiated interference immunity with a
 // chattering relay device, so please don't modify it without running such a test again!
@@ -210,7 +213,7 @@ enum BoardTypes detectBoardType()
 {
 #if defined(ARDUINO_PORTENTA_C33)
   return BOARD_PORTENTA_C33;
-#elif defined(ARDUINO_PORTENTA_H7_M7)
+#elif defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
   #if (defined(AUTOMATIC_OVERRIDE_PORTENTA_H7) && defined(AUTOMATIC_OVERRIDE_PORTENTA_MACHINE_CONTROL))
     #error "You have defined AUTOMATIC_OVERRIDE_PORTENTA_H7 and AUTOMATIC_OVERRIDE_PORTENTA_MACHINE_CONTROL at the same time"
   #endif
@@ -231,7 +234,7 @@ void deleteDevice(const enum DeviceNames deviceName, struct DeviceFileSystemComb
   // The USBHostMSD class for the H7 doesn't correctly support object destruction, so we only delete
   // the device object on other platforms or if the device is an SD Card -->
   bool deleteDevice = false;
-#if (!defined(ARDUINO_PORTENTA_H7_M7))
+#if (!defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA))
   (void) deviceName;    // Silence -Wunused-parameter, because this variable is only used on the H7
   deleteDevice = true;
 #else
@@ -360,7 +363,7 @@ int mountOrFormatSDCard(const enum FileSystems fileSystem,
   }
 
   // The Machine Control doesn't have an SD Card connector
-#if defined(ARDUINO_PORTENTA_H7_M7)
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
   if (true == runningOnMachineControl)
   {
     return ENOTBLK;
@@ -377,7 +380,7 @@ int mountOrFormatSDCard(const enum FileSystems fileSystem,
                                                        PIN_SDHI_D3,
                                                        PIN_SDHI_CD,
                                                        PIN_SDHI_WP);
-#elif defined(ARDUINO_PORTENTA_H7_M7)
+#elif defined(ARDUINO_PORTENTA_H7_M7) || !defined(ARDUINO_OPTA)
   sdcard.device = new(std::nothrow) SDMMCBlockDevice();
 #else
   sdcard.device = nullptr;
@@ -402,7 +405,7 @@ int mountOrFormatSDCard(const enum FileSystems fileSystem,
 int mountOrFormatUSBDevice(const enum FileSystems fileSystem,
                            const enum ActionTypes mountOrFormat)
 {
-#if defined(ARDUINO_PORTENTA_H7_M7)
+#if defined(ARDUINO_PORTENTA_H7_M7) 
   if (true == runningOnMachineControl)
   {
     // We need to apply power manually to the female USB A connector on the Machine Control
@@ -597,7 +600,7 @@ int register_hotplug_callback(const enum DeviceNames deviceName, void (* const c
         errno = EBUSY;
         return -1;
       }
-#if defined(ARDUINO_PORTENTA_H7_M7)
+#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
       // There is no support for callbacks in the USBHostMSD class on this platform
       errno = ENOTSUP;
       return -1;
