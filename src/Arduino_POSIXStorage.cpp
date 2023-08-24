@@ -59,18 +59,20 @@
 #if defined(ARDUINO_PORTENTA_C33)
   #include <SDCardBlockDevice.h>
   #include <UsbHostMsd.h>
-#elif defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
+#elif defined(ARDUINO_PORTENTA_H7_M7) 
   #include <Arduino_USBHostMbed5.h>
   #include <BlockDevice.h>
-  // Necessary for Portenta Machine Control detection
   #include <DigitalIn.h>
-
-
-#elif defined(ARDUINO_PORTENTA_H7_M7) || ! defined(ARDUINO_OPTA)
   #include <SDMMCBlockDevice.h>
+#elif defined(ARDUINO_OPTA) 
+  #include <Arduino_USBHostMbed5.h>
+  #include <BlockDevice.h>
+  #include <DigitalIn.h>
 #else
   #error "The POSIXStorage library does not support this board"
 #endif
+
+
 
 /*
 *********************************************************************************************************
