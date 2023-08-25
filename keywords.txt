@@ -1,0 +1,23 @@
+#######################################
+# Syntax Coloring Map For Arduino_UnifiedStorage
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Arduino_UnifiedStorage	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+mount                           KEYWORD2
+unmount                         KEYWORD2
+register_hotplug_callback       KEYWORD2
+deregister_hotplug_callback     KEYWORD2
+mkfs                            KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
