@@ -1,12 +1,12 @@
 #######################################
-# Syntax Coloring Map For Arduino_UnifiedStorage
+# Syntax Coloring Map For Arduino_POSIXStorage
 #######################################
 
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
 
-Arduino_UnifiedStorage	KEYWORD1
+Arduino_POSIXStorage	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
