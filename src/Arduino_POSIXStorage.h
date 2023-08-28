@@ -46,8 +46,8 @@
 *********************************************************************************************************
 */
 
-#ifndef POSIXStorage_H
-#define POSIXStorage_H
+#ifndef Arduino_POSIXStorage_H
+#define Arduino_POSIXStorage_H
 
 /*
 *********************************************************************************************************
@@ -152,4 +152,4 @@ int deregister_hotplug_callback(const enum DeviceNames deviceName);
 */
 int mkfs(const enum DeviceNames deviceName, const enum FileSystems fileSystem);
 
-#endif  // POSIXStorage_H
+#endif  // Arduino_POSIXStorage_H

@@ -388,7 +388,7 @@ int mountOrFormatSDCard(const enum FileSystems fileSystem,
   }
   // <--
 
-  int mountOrFormatReturn = mountOrFormatFileSystemOnDevice(DEV_SDCARD, &sdcard, fileSystem, "sdcard", mountOrFormat);
+  const int mountOrFormatReturn = mountOrFormatFileSystemOnDevice(DEV_SDCARD, &sdcard, fileSystem, "sdcard", mountOrFormat);
   if (0 != mountOrFormatReturn)
   {
     delete sdcard.device;
@@ -453,7 +453,7 @@ int mountOrFormatUSBDevice(const enum FileSystems fileSystem,
       return ENOTBLK;
     }
   }
-  int mountOrFormatReturn = mountOrFormatFileSystemOnDevice(DEV_USB, &usb, fileSystem, "usb", mountOrFormat);
+  const int mountOrFormatReturn = mountOrFormatFileSystemOnDevice(DEV_USB, &usb, fileSystem, "usb", mountOrFormat);
   if (0 != mountOrFormatReturn)
   {
     // Only delete if the object was created by this function
@@ -510,7 +510,7 @@ int mount(const enum DeviceNames deviceName,
     errno = ENOTSUP;
     return -1;
   }
-  int mountOrFormatReturn = mountOrFormat(deviceName, fileSystem, ACTION_MOUNT);
+  const int mountOrFormatReturn = mountOrFormat(deviceName, fileSystem, ACTION_MOUNT);
   if (0 != mountOrFormatReturn)
   {
     errno = mountOrFormatReturn;
@@ -521,7 +521,7 @@ int mount(const enum DeviceNames deviceName,
 
 int mkfs(const enum DeviceNames deviceName, const enum FileSystems fileSystem)
 {
-  int mountOrFormatReturn = mountOrFormat(deviceName, fileSystem, ACTION_FORMAT);
+  const int mountOrFormatReturn = mountOrFormat(deviceName, fileSystem, ACTION_FORMAT);
   if (0 != mountOrFormatReturn)
   {
     errno = mountOrFormatReturn;
@@ -532,7 +532,7 @@ int mkfs(const enum DeviceNames deviceName, const enum FileSystems fileSystem)
 
 int umount(const enum DeviceNames deviceName)
 {
-  struct DeviceFileSystemCombination *deviceFileSystemCombination;
+  struct DeviceFileSystemCombination *deviceFileSystemCombination = nullptr;
 
   switch (deviceName)
   {  
