@@ -164,8 +164,12 @@ enum BoardTypes detectPortentaH7TypeOnce()
   // Inject low level into input, wait 1 ms to settle
   vbusPin.mode(PullDown);
   delay(1);
-  // Shortly float the input and read the state
+  // Shortly float the input
   vbusPin.mode(PullNone);
+  // Give the external pull-up resistor on the Portenta Machine control enough time to
+  // raise the voltage to an acceptable high
+  delayMicroseconds(50);
+  // Read the state
   inAfterDown = vbusPin.read();
   // End floating state and leave the input in pull-up state
   vbusPin.mode(PullUp);
