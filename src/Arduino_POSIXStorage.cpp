@@ -655,7 +655,7 @@ int deregister_hotplug_callback(const enum DeviceNames deviceName)
 //
 // The mbed POSIX implementation has a potential problem, because it uses the fat_error_remap()
 // function to remap error codes from ChaN's FatFs to negative errno numbers. It does this with
-// a long switch statment that ends with the default "return -res;" where res is the return code
+// a long switch statement that ends with the default "return -res;" where res is the return code
 // from FatFs. The integer ranges used by these two types of error codes overlap, and should
 // FatFs add a new error code, it will be turned into an erroneous errno. At the time of writing,
 // fat_error_remap() remaps every possible FatFs code. But if FatFs adds another code, it will
