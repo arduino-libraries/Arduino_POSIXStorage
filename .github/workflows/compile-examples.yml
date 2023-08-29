@@ -39,9 +39,9 @@ jobs:
       matrix:
         board:
           - fqbn: arduino:mbed_portenta:envie_m7
-            platforms: |
-              - name: arduino:mbed_portenta
-          - fqbn: arduino:renesas_portenta
+            type: arduino:mbed_portenta
+          - fqbn: arduino:renesas_portenta:portenta_c33
+            type: renesas_portenta
 
     steps:
       - name: Checkout repository
