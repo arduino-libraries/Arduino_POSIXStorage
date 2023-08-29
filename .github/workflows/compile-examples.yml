@@ -1,18 +1,10 @@
 name: Compile Examples
 
 on: 
-  pull_request:
-    paths:
-      - ".github/workflows/compile-examples.yml"
-      - "library.properties"
-      - "src/**"
-      - "examples/**"
   push:
-    paths:
-      - ".github/workflows/compile-examples.yml"
-      - "library.properties"
-      - "src/**"
-      - "examples/**"
+    branches: [main]
+  pull_request:
+    branches: [main]
   # Scheduled trigger checks for breakage caused by changes to external resources (libraries, platforms)
   schedule:
     # run every Tuesday at 3 AM UTC
@@ -44,7 +36,7 @@ jobs:
             - name: arduino:mbed_portenta
           libraries: |
             - source-path: ./
-            - name: ArduinoRS485
+            - name: Arduino_POSIXStorage
           sketch-paths: |
             - examples            
           enable-deltas-report: true
