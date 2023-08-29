@@ -36,7 +36,6 @@ jobs:
             - name: arduino:mbed_portenta
           libraries: |
             - source-path: ./
-            - name: Arduino_POSIXStorage
           sketch-paths: |
             - examples            
           enable-deltas-report: true
