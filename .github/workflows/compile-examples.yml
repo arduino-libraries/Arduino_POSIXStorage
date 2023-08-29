@@ -38,12 +38,10 @@ jobs:
 
       matrix:
         board:
-          # TODO: Add list of boards to compile for here:
           - fqbn: arduino:mbed_portenta:envie_m7
-            # TODO: Define the board's platform dependencies here.
-            # See: https://github.com/arduino/compile-sketches#platforms
             platforms: |
               - name: arduino:mbed_portenta
+          - fqbn: arduino:renesas_portenta
 
     steps:
       - name: Checkout repository
