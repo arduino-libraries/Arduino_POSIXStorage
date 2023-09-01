@@ -43,7 +43,7 @@ Start pathnames on SD Cards with "/sdcard/" and pathnames on USB thumb drives wi
 
 The following are additional functions provided by the library:
 
-### `int` [`mount`](#)`(enum DeviceNames deviceName, enum FileSystems fileSystem, enum MountFlags mountFlags)`
+### `int` [`mount`](#)`(enum StorageDevices deviceName, enum FileSystems fileSystem, enum MountFlags mountFlags)`
 
 Attach a file system to a device.
 
@@ -56,7 +56,7 @@ Attach a file system to a device.
 On success: 0. On failure: -1 with an error code in the errno variable.
 
 
-### `int` [`umount`](#)`(enum DeviceNames deviceName)`
+### `int` [`umount`](#)`(enum StorageDevices deviceName)`
 
 Remove the attached file system from a device.
 
@@ -67,7 +67,7 @@ Remove the attached file system from a device.
 On success: 0. On failure: -1 with an error code in the errno variable.
 
 
-### `int` [`register_hotplug_callback`](#)`(enum DeviceNames deviceName, void (*callbackFunction)())`
+### `int` [`register_hotplug_callback`](#)`(enum StorageDevices deviceName, void (*callbackFunction)())`
 
 Register a hotplug callback function. Currently only supported for DEV_USB on Portenta C33.
 
@@ -79,7 +79,7 @@ Register a hotplug callback function. Currently only supported for DEV_USB on Po
 On success: 0. On failure: -1 with an error code in the errno variable.
 
 
-### `int` [`deregister_hotplug_callback`](#)`(enum DeviceNames deviceName)`
+### `int` [`deregister_hotplug_callback`](#)`(enum StorageDevices deviceName)`
 
 Deregister a previously registered hotplug callback function. Not currently supported on any platform.
 
@@ -90,7 +90,7 @@ Deregister a previously registered hotplug callback function. Not currently supp
 On success: 0. On failure: -1 with an error code in the errno variable.
 
 
-### `int` [`mkfs`](#)`(enum DeviceNames deviceName, enum FileSystems fileSystem)`
+### `int` [`mkfs`](#)`(enum StorageDevices deviceName, enum FileSystems fileSystem)`
 
 Format a device (make file system).
 
