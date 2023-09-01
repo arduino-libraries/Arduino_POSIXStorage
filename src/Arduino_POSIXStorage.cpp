@@ -235,7 +235,7 @@ enum BoardTypes detectBoardType()
 #endif
 }   // End of detectBoardType()
 
-void deleteDevice(const enum DeviceNames deviceName, struct DeviceFileSystemCombination * const deviceFileSystemCombination)
+void deleteDevice(const enum StorageDevices deviceName, struct DeviceFileSystemCombination * const deviceFileSystemCombination)
 {
   // The USBHostMSD class for the H7 doesn't correctly support object destruction, so we only delete
   // the device object on other platforms or if the device is an SD Card -->
@@ -258,7 +258,7 @@ void deleteDevice(const enum DeviceNames deviceName, struct DeviceFileSystemComb
 }   // End of deleteDevice()
 
 // WARNING: Don't set errno and return -1 in this function - just return 0 for success or the errno code!
-int mountOrFormatFileSystemOnDevice(const enum DeviceNames deviceName,
+int mountOrFormatFileSystemOnDevice(const enum StorageDevices deviceName,
                                     struct DeviceFileSystemCombination * const deviceFileSystemCombination,
                                     const enum FileSystems fileSystem,
                                     const char * const mountPoint,
@@ -476,7 +476,7 @@ int mountOrFormatUSBDevice(const enum FileSystems fileSystem,
 }   // End of mountOrFormatUSB()
 
 // WARNING: Don't set errno and return -1 in this function - just return 0 for success or the errno code!
-int mountOrFormat(const enum DeviceNames deviceName,
+int mountOrFormat(const enum StorageDevices deviceName,
                   const enum FileSystems fileSystem,
                   const enum ActionTypes mountOrFormat)
 {
@@ -509,7 +509,7 @@ int mountOrFormat(const enum DeviceNames deviceName,
 *********************************************************************************************************
 */
 
-int mount(const enum DeviceNames deviceName,
+int mount(const enum StorageDevices deviceName,
           const enum FileSystems fileSystem,
           const enum MountFlags mountFlags)
 {
@@ -528,7 +528,7 @@ int mount(const enum DeviceNames deviceName,
   return 0;
 }   // End of mount()
 
-int mkfs(const enum DeviceNames deviceName, const enum FileSystems fileSystem)
+int mkfs(const enum StorageDevices deviceName, const enum FileSystems fileSystem)
 {
   const int mountOrFormatReturn = mountOrFormat(deviceName, fileSystem, ACTION_FORMAT);
   if (0 != mountOrFormatReturn)
@@ -539,7 +539,7 @@ int mkfs(const enum DeviceNames deviceName, const enum FileSystems fileSystem)
   return 0;
 }   // End of mkfs()
 
-int umount(const enum DeviceNames deviceName)
+int umount(const enum StorageDevices deviceName)
 {
   struct DeviceFileSystemCombination *deviceFileSystemCombination = nullptr;
 
@@ -579,7 +579,7 @@ int umount(const enum DeviceNames deviceName)
   }
 }   // End of umount()
 
-int register_hotplug_callback(const enum DeviceNames deviceName, void (* const callbackFunction)())
+int register_hotplug_callback(const enum StorageDevices deviceName, void (* const callbackFunction)())
 {
   if (true == hotplugCallbackAlreadyRegistered)
   {
@@ -641,7 +641,7 @@ int register_hotplug_callback(const enum DeviceNames deviceName, void (* const c
 }   // End of hotplug_register_callback()
 
 // Not supported by the layer below on these platforms, but might be on other platforms
-int deregister_hotplug_callback(const enum DeviceNames deviceName)
+int deregister_hotplug_callback(const enum StorageDevices deviceName)
 {
   (void) deviceName;    // Remove when implemented, only here to silence -Wunused-parameter
   errno = ENOSYS;

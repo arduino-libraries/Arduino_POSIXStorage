@@ -41,7 +41,7 @@ void usbCallback()
 
 void setup() {
   bool allTestsOk = true;
-  enum DeviceNames deviceName;
+  enum StorageDevices deviceName;
   int fileDescriptor = 0;
   int retVal = -1;
 

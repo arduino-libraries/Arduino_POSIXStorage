@@ -88,7 +88,7 @@
 *********************************************************************************************************
 */
 
-enum DeviceNames : uint8_t
+enum StorageDevices : uint8_t
 {
   DEV_SDCARD, ///< SD Card
   DEV_USB    ///< USB Thumb Drive
@@ -119,7 +119,7 @@ enum MountFlags : uint8_t
 * @param mountFlags The only valid flag at this time: MNT_DEFAULT.
 * @return On success: 0. On failure: -1 with an error code in the errno variable.
 */
-int mount(const enum DeviceNames deviceName,
+int mount(const enum StorageDevices deviceName,
           const enum FileSystems fileSystem,
           const enum MountFlags mountFlags);
 
@@ -128,7 +128,7 @@ int mount(const enum DeviceNames deviceName,
 * @param deviceName The device to remove from: DEV_SDCARD or DEV_USB.
 * @return On success: 0. On failure: -1 with an error code in the errno variable.
 */
-int umount(const enum DeviceNames deviceName);
+int umount(const enum StorageDevices deviceName);
 
 /**
 * @brief Register a hotplug callback function. Currently only supported for DEV_USB on Portenta C33.
@@ -136,14 +136,14 @@ int umount(const enum DeviceNames deviceName);
 * @param callbackFunction A function pointer to the callback.
 * @return On success: 0. On failure: -1 with an error code in the errno variable.
 */
-int register_hotplug_callback(const enum DeviceNames deviceName, void (* const callbackFunction)());
+int register_hotplug_callback(const enum StorageDevices deviceName, void (* const callbackFunction)());
 
 /**
 * @brief Deregister a previously registered hotplug callback function. Not currently supported on any platform.
 * @param deviceName The device to deregister for: DEV_SDCARD or DEV_USB.
 * @return On success: 0. On failure: -1 with an error code in the errno variable.
 */
-int deregister_hotplug_callback(const enum DeviceNames deviceName);
+int deregister_hotplug_callback(const enum StorageDevices deviceName);
 
 /**
 * @brief Format a device (make file system).
@@ -151,6 +151,6 @@ int deregister_hotplug_callback(const enum DeviceNames deviceName);
 * @param fileSystem The file system type to format: FS_FAT or FS_LITTLEFS. FS_FAT is probably the better choice for both SD Cards and USB thumb drives in most cases.
 * @return On success: 0. On failure: -1 with an error code in the errno variable.
 */
-int mkfs(const enum DeviceNames deviceName, const enum FileSystems fileSystem);
+int mkfs(const enum StorageDevices deviceName, const enum FileSystems fileSystem);
 
 #endif  // Arduino_POSIXStorage_H
