@@ -88,21 +88,24 @@
 *********************************************************************************************************
 */
 
+/// @brief Enum to select the storage device to use.
 enum StorageDevices : uint8_t
 {
   DEV_SDCARD, ///< SD Card
   DEV_USB    ///< USB Thumb Drive
 };
 
+/// @brief Enum to select the file system to use.
 enum FileSystems : uint8_t
 {
   FS_FAT, ///< FAT file system
   FS_LITTLEFS ///< LittleFS file system
 };
 
+/// @brief Enum to select the mount mode to use. The default mode is Read/Write.
 enum MountFlags : uint8_t
 {
-  MNT_DEFAULT, ///< Default mount mode
+  MNT_DEFAULT, ///< Default mount mode (Read/Write)
   MNT_RDONLY   ///< Read only mode
 };
 
