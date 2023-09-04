@@ -41,66 +41,7 @@ Many ISO C standard functions are also made available. For example: fopen, fprin
 
 Start pathnames on SD Cards with "/sdcard/" and pathnames on USB thumb drives with "/usb/". See the Examples section below for examples.
 
-The following are additional functions provided by the library:
-
-### `int` [`mount`](#)`(enum StorageDevices deviceName, enum FileSystems fileSystem, enum MountFlags mountFlags)`
-
-Attach a file system to a device.
-
-#### Parameters
-* `deviceName` The device to attach to: DEV_SDCARD or DEV_USB.
-* `fileSystem` The file system type to attach: FS_FAT or FS_LITTLEFS.
-* `mountFlags` The only valid flag at this time: MNT_DEFAULT (future platforms might also support MNT_RDONLY).
-
-#### Returns
-On success: 0. On failure: -1 with an error code in the errno variable.
-
-
-### `int` [`umount`](#)`(enum StorageDevices deviceName)`
-
-Remove the attached file system from a device.
-
-#### Parameters
-* `deviceName` The device to remove from: DEV_SDCARD or DEV_USB.
-
-#### Returns
-On success: 0. On failure: -1 with an error code in the errno variable.
-
-
-### `int` [`register_hotplug_callback`](#)`(enum StorageDevices deviceName, void (*callbackFunction)())`
-
-Register a hotplug callback function. Currently only supported for DEV_USB on Portenta C33.
-
-#### Parameters
-* `deviceName` The device to register for: DEV_SDCARD or DEV_USB.
-* `callbackFunction` A function pointer to the callback.
-
-#### Returns
-On success: 0. On failure: -1 with an error code in the errno variable.
-
-
-### `int` [`deregister_hotplug_callback`](#)`(enum StorageDevices deviceName)`
-
-Deregister a previously registered hotplug callback function. Not currently supported on any platform.
-
-#### Parameters
-* `deviceName` The device to deregister for: DEV_SDCARD or DEV_USB.
-
-#### Returns
-On success: 0. On failure: -1 with an error code in the errno variable.
-
-
-### `int` [`mkfs`](#)`(enum StorageDevices deviceName, enum FileSystems fileSystem)`
-
-Format a device (make file system).
-
-#### Parameters
-* `deviceName` The device to format: DEV_SDCARD or DEV_USB.
-* `fileSystem` The file system type to format: FS_FAT or FS_LITTLEFS. FS_FAT is probably the better choice for both SD Cards and USB thumb drives in most cases.
-
-#### Returns
-On success: 0. On failure: -1 with an error code in the errno variable.
-
+See [here](./api.md) for a complete description of the API.
 
 ## Examples
 
