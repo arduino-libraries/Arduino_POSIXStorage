@@ -16,6 +16,7 @@
 *                    - Portenta H7 with Portenta Breakout Board  (SD Card and USB Thumb Drive)
 *                    - Portenta H7 with Portenta Vision Shield   (SD Card)
 *                    - Portenta Machine Control                  (USB Thumb Drive)
+*                    - Opta                                      (USB Thumb Drive)
 *
 *                    After making changes:
 *                    
@@ -67,7 +68,6 @@
 #elif defined(ARDUINO_OPTA) 
   #include <Arduino_USBHostMbed5.h>
   #include <BlockDevice.h>
-  #include <DigitalIn.h>
 #else
   #error "The POSIXStorage library does not support this board"
 #endif
@@ -240,7 +240,7 @@ void deleteDevice(const enum StorageDevices deviceName, struct DeviceFileSystemC
   // The USBHostMSD class for the H7 doesn't correctly support object destruction, so we only delete
   // the device object on other platforms or if the device is an SD Card -->
   bool deleteDevice = false;
-#if (!defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA))
+#if (!(defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)))
   (void) deviceName;    // Silence -Wunused-parameter, because this variable is only used on the H7
   deleteDevice = true;
 #else

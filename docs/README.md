@@ -8,6 +8,7 @@ The library supports and is tested on:
 - Portenta H7 with Portenta Breakout Board  (SD Card and USB Thumb Drive)
 - Portenta H7 with Portenta Vision Shield   (SD Card)
 - Portenta Machine Control                  (USB Thumb Drive)
+- Opta                                      (USB Thumb Drive)
 
 
 ## Usage
