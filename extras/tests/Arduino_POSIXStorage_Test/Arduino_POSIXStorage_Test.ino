@@ -17,7 +17,9 @@ enum TestTypes : uint8_t
   TEST_PORTENTA_H7_SDCARD,
   TEST_PORTENTA_H7_USB,
   TEST_PORTENTA_MACHINE_CONTROL_SDCARD,
-  TEST_PORTENTA_MACHINE_CONTROL_USB
+  TEST_PORTENTA_MACHINE_CONTROL_USB,
+  TEST_OPTA_SDCARD,
+  TEST_OPTA_USB
 };
 
 // !!! TEST CONFIGURATION !!! -->
@@ -45,11 +47,11 @@ void setup() {
   int fileDescriptor = 0;
   int retVal = -1;
 
-  if ((TEST_PORTENTA_C33_USB == selectedTest) || (TEST_PORTENTA_H7_USB == selectedTest) || (TEST_PORTENTA_MACHINE_CONTROL_USB == selectedTest))
+  if ((TEST_PORTENTA_C33_USB == selectedTest) || (TEST_PORTENTA_H7_USB == selectedTest) || (TEST_PORTENTA_MACHINE_CONTROL_USB == selectedTest) || (TEST_OPTA_USB == selectedTest))
   {
     deviceName = DEV_USB;
   }
-  else if ((TEST_PORTENTA_C33_SDCARD == selectedTest) || (TEST_PORTENTA_H7_SDCARD == selectedTest) || (TEST_PORTENTA_MACHINE_CONTROL_SDCARD == selectedTest))
+  else if ((TEST_PORTENTA_C33_SDCARD == selectedTest) || (TEST_PORTENTA_H7_SDCARD == selectedTest) || (TEST_PORTENTA_MACHINE_CONTROL_SDCARD == selectedTest) || (TEST_OPTA_SDCARD == selectedTest))
   {
     deviceName = DEV_SDCARD;
   }
@@ -59,18 +61,23 @@ void setup() {
   }
 
   Serial.begin(9600);
-  while (!Serial) ; // Wait for the serial port to be ready
+  // We can't have the Serial Monitor connected when we thest USB on the Opta, and this will cause
+  // the test to freeze unless we skip it
+  if (TEST_OPTA_USB != selectedTest)
+  {
+    while (!Serial) ; // Wait for the serial port to be ready
+  }
 
   Serial.println("Testing started, please wait...");
   Serial.println();
 
-  if (TEST_PORTENTA_MACHINE_CONTROL_SDCARD == selectedTest)
+  if ((TEST_PORTENTA_MACHINE_CONTROL_SDCARD == selectedTest) || (TEST_OPTA_SDCARD == selectedTest))
   {
-    // Machine Control no SD Card supported test -->
+    // Machine Control and Opta no SD Card supported test -->
     retVal = mount(DEV_SDCARD, FS_FAT, MNT_DEFAULT);
     if ((-1 != retVal) || (ENOTBLK != errno))
     {
-      Serial.println("[FAIL] Machine Control no SD Card supported test failed");
+      Serial.println("[FAIL] Machine Control and Opta no SD Card supported test failed");
     }
     else
     {
@@ -80,7 +87,7 @@ void setup() {
       (void) umount(DEV_SDCARD);
       for ( ; ; ) ;   // Stop testing here
     }
-    // <-- Machine Control no SD Card supported test
+    // <-- Machine Control and Opta no SD Card supported test
   }
 
   // Register hotplug callback for SD Card test -->
@@ -110,7 +117,7 @@ void setup() {
     // <-- Register nullptr callback test
   }
 
-  if ((TEST_PORTENTA_H7_USB == selectedTest) || (TEST_PORTENTA_MACHINE_CONTROL_USB == selectedTest))
+  if ((TEST_PORTENTA_H7_USB == selectedTest) || (TEST_PORTENTA_MACHINE_CONTROL_USB == selectedTest) || (TEST_OPTA_USB == selectedTest))
   {
     // Register unsupported callback test -->
     retVal = register_hotplug_callback(DEV_USB, usbCallback);
@@ -135,7 +142,7 @@ void setup() {
         delay(500);
       }
     }
-    else if ((TEST_PORTENTA_H7_USB == selectedTest) || (TEST_PORTENTA_MACHINE_CONTROL_USB == selectedTest))
+    else if ((TEST_PORTENTA_H7_USB == selectedTest) || (TEST_PORTENTA_MACHINE_CONTROL_USB == selectedTest) || (TEST_OPTA_USB == selectedTest))
     {
       // These boards don't support hotplug callbacks, so loop on mount() tries
       while (0 != mount(DEV_USB, FS_FAT, MNT_DEFAULT)) {
@@ -457,6 +464,25 @@ void setup() {
     Serial.println("FAILURE: Finished with errors (see list above for details)");
   }
   // <-- Final report
+
+  // Opta final report -->
+  if (TEST_OPTA_USB == selectedTest)
+  {
+    (void) mount(deviceName, FS_FAT, MNT_DEFAULT);
+    FILE *logFile = fopen("/usb/testlog.txt", "w");
+    if (true == allTestsOk)
+    {
+      fprintf(logFile, "SUCCESS: Finished without errors");
+      fclose(logFile);      
+    }
+    else
+    {
+      fprintf(logFile, "FAILURE: Finished with errors");
+      fclose(logFile);      
+    }
+    (void) umount(deviceName);
+  }
+  // <--
 }
 
 void loop() {
