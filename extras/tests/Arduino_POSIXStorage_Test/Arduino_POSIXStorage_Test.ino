@@ -61,7 +61,7 @@ void setup() {
   }
 
   Serial.begin(9600);
-  // We can't have the Serial Monitor connected when we thest USB on the Opta, and this will cause
+  // We can't have the Serial Monitor connected when we test USB on the Opta, and this will cause
   // the test to freeze unless we skip it
   if (TEST_OPTA_USB != selectedTest)
   {
