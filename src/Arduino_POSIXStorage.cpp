@@ -480,7 +480,8 @@ int mountOrFormat(const enum StorageDevices deviceName,
                   const enum FileSystems fileSystem,
                   const enum ActionTypes mountOrFormat)
 {
-  // Determine if we're running on Machine Control or not on the first call to mount() or mkfs() -->
+  // Determine if we're running on Machine Control or not on the first call to mount(), mkfs(), or
+  // register_hotplug_callback()  -->
   if (false == hasMountedBefore)
   {
     hasMountedBefore = true;
@@ -599,6 +600,24 @@ int register_hotplug_callback(const enum StorageDevices deviceName, void (* cons
     case DEV_USB:
       { // Curly braces necessary to keep new variables inside the case statement
 
+      // Determine if we're running on Machine Control or not on the first call to mount(), mkfs(), or
+      // register_hotplug_callback()  -->
+      if (false == hasMountedBefore)
+      {
+        hasMountedBefore = true;
+        if (BOARD_MACHINE_CONTROL == detectBoardType())
+        {
+          runningOnMachineControl = true;
+        }
+      }
+      // <--
+#if defined(ARDUINO_PORTENTA_H7_M7)
+      if (true == runningOnMachineControl)
+      {
+        // We need to apply power manually to the female USB A connector on the Machine Control
+        mbed::DigitalOut enablePower(PB_14, 0);
+      }
+#endif
       // A USB mass storage device is already mounted at that mount point, or
       // registered for the hotplug event
       if (nullptr != usb.device)
@@ -606,11 +625,6 @@ int register_hotplug_callback(const enum StorageDevices deviceName, void (* cons
         errno = EBUSY;
         return -1;
       }
-#if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
-      // There is no support for callbacks in the USBHostMSD class on this platform
-      errno = ENOTSUP;
-      return -1;
-#else      
       // We must create a USBHostMSD object to attach the callback to, but we
       // don't create a file system object because we don't fully mount() anything
       USBHostMSD *usbHostDevice = nullptr;
@@ -620,10 +634,15 @@ int register_hotplug_callback(const enum StorageDevices deviceName, void (* cons
         errno = ENOTBLK;
         return -1;
       }
+#if ((defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)))
+      // The Arduino_USBHostMbed5 library doesn't initialize the USB stack until
+      // the first connect() call because of an older bugfix (commit 72d0aa6), so
+      // we perform one connect() here to initialize the stack
+      usbHostDevice->connect();
+#endif
       if (false == (usbHostDevice->attach_detected_callback(callbackFunction)))
       {
-        delete usbHostDevice;   // Ok to delete, because this isn't on the H7
-        usbHostDevice = nullptr;
+        deleteDevice(DEV_USB, &usb);
         errno = EINVAL;
         return -1;
       }
@@ -632,7 +651,7 @@ int register_hotplug_callback(const enum StorageDevices deviceName, void (* cons
       // Prevent multiple registrations
       hotplugCallbackAlreadyRegistered = true;
       return 0;
-#endif
+
       } // Curly braces necessary to keep new variables inside the case statement
     default:
       errno = ENOTBLK;
