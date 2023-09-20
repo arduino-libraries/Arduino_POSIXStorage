@@ -24,7 +24,7 @@ enum TestTypes : uint8_t
 
 // !!! TEST CONFIGURATION !!! -->
 
-constexpr enum TestTypes selectedTest = TEST_PORTENTA_C33_SDCARD;
+constexpr enum TestTypes selectedTest = TEST_PORTENTA_H7_USB;
 
 // Notice that formtting tests can take a while to complete
 
@@ -35,10 +35,16 @@ constexpr enum TestTypes selectedTest = TEST_PORTENTA_C33_SDCARD;
 // <-- !!! TEST CONFIGURATION !!!
 
 volatile bool usbAttached = false;
+volatile bool usbDetached = false;
 
 void usbCallback()
 {
   usbAttached = true;
+}
+
+void usbCallback2()
+{
+  usbDetached = true;
 }
 
 void setup() {
@@ -104,60 +110,55 @@ void setup() {
   }
   // <-- Register hotplug callback for SD Card test
 
-  if (TEST_PORTENTA_C33_USB == selectedTest)
+  // Register unplug callback for SD Card test -->
+  if (DEV_SDCARD == deviceName)
   {
-    // Register nullptr callback test -->
+    // Using usbCallback2() is fine because it doesn't get registered anyway
+    retVal = register_unplug_callback(DEV_SDCARD, usbCallback2);
+    if ((-1 != retVal) || (ENOTSUP != errno))
+    {
+      allTestsOk = false;
+      Serial.print("[FAIL] Register unplug callback for SD Card test failed");
+      Serial.println();
+    }
+  }
+  // <-- Register unplug callback for SD Card test
+
+  if (DEV_USB == deviceName)
+  {
+    // Register nullptr callback test (hotplug) -->
     retVal = register_hotplug_callback(DEV_USB, nullptr);
     if ((-1 != retVal) || (EFAULT != errno))
     {
       allTestsOk = false;
-      Serial.print("[FAIL] Register nullptr callback test failed");
+      Serial.print("[FAIL] Register nullptr callback test failed (hotplug)");
       Serial.println();
     }
-    // <-- Register nullptr callback test
-  }
+    // <-- Register nullptr callback test (hotplug)
 
-  if ((TEST_PORTENTA_H7_USB == selectedTest) || (TEST_PORTENTA_MACHINE_CONTROL_USB == selectedTest) || (TEST_OPTA_USB == selectedTest))
-  {
-    // Register unsupported callback test -->
-    retVal = register_hotplug_callback(DEV_USB, usbCallback);
-    if ((-1 != retVal) || (ENOTSUP != errno))
+    // Register nullptr callback test (unplug) -->
+    retVal = register_unplug_callback(DEV_USB, nullptr);
+    if ((-1 != retVal) || (EFAULT != errno))
     {
       allTestsOk = false;
-      Serial.println("[FAIL] Register unsupported callback test");
+      Serial.print("[FAIL] Register nullptr callback test failed (unplug)");
       Serial.println();
     }
-    // <-- Register unsupported callback test
+    // <-- Register nullptr callback test (unplug)
   }
 
-  // This isn't a test, just wait for a USB thumb drive -->
+  // Wait for a USB thumb drive -->
   if (DEV_USB == deviceName)
   {
     Serial.println("Please insert a thumb drive");
-    if (TEST_PORTENTA_C33_USB == selectedTest)
-    {
-      // This board supports hotplug callbacks
-      (void) register_hotplug_callback(DEV_USB, usbCallback);
-      while (false == usbAttached) {
-        delay(500);
-      }
-    }
-    else if ((TEST_PORTENTA_H7_USB == selectedTest) || (TEST_PORTENTA_MACHINE_CONTROL_USB == selectedTest) || (TEST_OPTA_USB == selectedTest))
-    {
-      // These boards don't support hotplug callbacks, so loop on mount() tries
-      while (0 != mount(DEV_USB, FS_FAT, MNT_DEFAULT)) {
-        delay(500);
-      }
-      (void) umount(DEV_USB);
-    }
-    else
-    {
-      for ( ; ;) ;  // Shouldn't get here unless there's a bug in the test code
+    (void) register_hotplug_callback(DEV_USB, usbCallback);
+    while (false == usbAttached) {
+      delay(500);
     }
     Serial.println("Thank you!");
     Serial.println();
   }
-  // <-- This isn't a test, just wait for a USB thumb drive
+  // <-- Wait for a USB thumb drive
   
 #if defined(PERFORM_FORMATTING_TESTS)
   Serial.println("The formatting tests you selected can take a while to complete");
@@ -335,26 +336,35 @@ void setup() {
   (void) umount(deviceName);
   // <-- mount() when already mounted test
 
-  if (TEST_PORTENTA_C33_USB == selectedTest)
+  if (DEV_USB == deviceName)
   {
-    // Register multiple callbacks test -->
+    // Register multiple callbacks test (hotplug) -->
     retVal = register_hotplug_callback(DEV_USB, usbCallback);
     if ((-1 != retVal) || (EBUSY != errno))
     {
       allTestsOk = false;
-      Serial.println("[FAIL] Register multiple callbacks test failed");
+      Serial.println("[FAIL] Register multiple callbacks test failed (hotplug)");
     }
-    // <-- Register multiple callbacks test
+    // <-- Register multiple callbacks test (hotplug)
   }
 
-  // Deregister callback not supported test -->
+  // Deregister callback not supported test (hotplug) -->
   retVal = deregister_hotplug_callback(DEV_USB);
   if ((-1 != retVal) || (ENOSYS != errno))
   {
     allTestsOk = false;
     Serial.println("[FAIL] Deregister callback not supported test failed");
   }
-  // <-- Deregister callback not supported test
+  // <-- Deregister callback not supported test (hotplug)
+
+  // Deregister callback not supported test (unplug) -->
+  retVal = deregister_unplug_callback(DEV_USB);
+  if ((-1 != retVal) || (ENOSYS != errno))
+  {
+    allTestsOk = false;
+    Serial.println("[FAIL] Deregister callback not supported test failed");
+  }
+  // <-- Deregister callback not supported test (unplug)
 
   // Remove before persistent storage test -->
   (void) mount(deviceName, FS_FAT, MNT_DEFAULT);
@@ -450,6 +460,31 @@ void setup() {
   }
   (void) umount(deviceName);
   // <-- Persistent storage test
+
+  // Wait for USB thumb drive removal -->
+  if (DEV_USB == deviceName)
+  {
+    Serial.println();
+    Serial.println("Please remove the thumb drive");
+    (void) register_unplug_callback(DEV_USB, usbCallback2);
+    while (false == usbDetached) {
+      delay(500);
+    }
+    Serial.println("Thank you!");
+  }
+  // <-- Wait for USB thumb drive removal
+
+  if (DEV_USB == deviceName)
+  {
+    // Register multiple callbacks test (unplug) -->
+    retVal = register_unplug_callback(DEV_USB, usbCallback);
+    if ((-1 != retVal) || (EBUSY != errno))
+    {
+      allTestsOk = false;
+      Serial.println("[FAIL] Register multiple callbacks test failed (unplug)");
+    }
+    // <-- Register multiple callbacks test (unplug)
+  }
 
   // Final report -->
   Serial.println();

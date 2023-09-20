@@ -72,8 +72,6 @@
   #error "The POSIXStorage library does not support this board"
 #endif
 
-
-
 /*
 *********************************************************************************************************
 *                                  Library-internal using declarations
@@ -116,6 +114,12 @@ enum BoardTypes : uint8_t
   BOARD_PORTENTA_C33
 };
 
+enum CallbackTypes : uint8_t
+{
+  CALLBACK_HOTPLUG,
+  CALLBACK_UNPLUG
+};
+
 /*
 *********************************************************************************************************
 *                       Unnamed namespace for library-internal global variables
@@ -130,6 +134,7 @@ struct DeviceFileSystemCombination usb    = {nullptr, nullptr};
 // <--
 
 bool hotplugCallbackAlreadyRegistered = false;
+bool unplugCallbackAlreadyRegistered = false;
 
 // Used to handle special case (powering USB A female socket separately) for Machine Control -->
 bool hasMountedBefore = false;
@@ -234,6 +239,28 @@ enum BoardTypes detectBoardType()
   #error "This board is not supported"
 #endif
 }   // End of detectBoardType()
+
+void portentaMachineControlPowerHandling()
+{
+  // Determine if we're running on Machine Control or not on the first call to mount(), mkfs(),
+  // register_hotplug_callback(), or register_unplug_callback()  -->
+  if (false == hasMountedBefore)
+  {
+    hasMountedBefore = true;
+    if (BOARD_MACHINE_CONTROL == detectBoardType())
+    {
+      runningOnMachineControl = true;
+    }
+  }
+  // <--
+#if defined(ARDUINO_PORTENTA_H7_M7)
+  if (true == runningOnMachineControl)
+  {
+    // We need to apply power manually to the female USB A connector on the Machine Control
+    mbed::DigitalOut enablePower(PB_14, 0);
+  }
+#endif
+} // End of portentaMachineControl()
 
 void deleteDevice(const enum StorageDevices deviceName, struct DeviceFileSystemCombination * const deviceFileSystemCombination)
 {
@@ -411,14 +438,6 @@ int mountOrFormatSDCard(const enum FileSystems fileSystem,
 int mountOrFormatUSBDevice(const enum FileSystems fileSystem,
                            const enum ActionTypes mountOrFormat)
 {
-#if defined(ARDUINO_PORTENTA_H7_M7) 
-  if (true == runningOnMachineControl)
-  {
-    // We need to apply power manually to the female USB A connector on the Machine Control
-    mbed::DigitalOut enablePower(PB_14, 0);
-  }
-#endif
-
   // We'll need a USBHostMSD pointer because connect() and connected() we'll use later aren't member
   // functions of the base class BlockDevice
   USBHostMSD *usbHostDevice = nullptr;
@@ -480,17 +499,7 @@ int mountOrFormat(const enum StorageDevices deviceName,
                   const enum FileSystems fileSystem,
                   const enum ActionTypes mountOrFormat)
 {
-  // Determine if we're running on Machine Control or not on the first call to mount(), mkfs(), or
-  // register_hotplug_callback()  -->
-  if (false == hasMountedBefore)
-  {
-    hasMountedBefore = true;
-    if (BOARD_MACHINE_CONTROL == detectBoardType())
-    {
-      runningOnMachineControl = true;
-    }
-  }
-  // <--
+  portentaMachineControlPowerHandling();
   switch (deviceName)
   {
     case DEV_SDCARD:
@@ -501,6 +510,91 @@ int mountOrFormat(const enum StorageDevices deviceName,
       return ENOTBLK;
   }
 }   // End of mountOrFormat()
+
+// WARNING: Don't set errno and return -1 in this function - just return 0 for success or the errno code!
+int register_callback(const enum StorageDevices deviceName, void (* const callbackFunction)(), enum CallbackTypes callbackType)
+{
+  if (((CALLBACK_HOTPLUG == callbackType) && (true == hotplugCallbackAlreadyRegistered)) ||
+     ((CALLBACK_UNPLUG == callbackType) && (true == unplugCallbackAlreadyRegistered)))
+  {
+    return EBUSY;
+  }
+  if (nullptr == callbackFunction)
+  {
+    return EFAULT;
+  }
+  switch (deviceName)
+  {
+    case DEV_SDCARD:    // There is no support for callbacks in the any of the SD Card block device classes
+      return ENOTSUP;
+    case DEV_USB:
+      { // Curly braces necessary to keep new variables inside the case statement
+
+      portentaMachineControlPowerHandling();
+      USBHostMSD *usbHostDevice = nullptr;
+      if (nullptr == usb.device)
+      {
+        // We must create a USBHostMSD object to attach the callback to, but we
+        // don't create a file system object because we don't fully mount() anything
+        usbHostDevice = new(std::nothrow) USBHostMSD;
+        if (nullptr == usbHostDevice)
+        {
+          return ENOTBLK;
+        }
+#if ((defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)))
+        // The Arduino_USBHostMbed5 library doesn't initialize the USB stack until
+        // the first connect() call because of an older bugfix (commit 72d0aa6), so
+        // we perform one connect() here to initialize the stack
+        usbHostDevice->connect();
+#endif
+        // This is necessary for future calls to mount(), umount(), and mkfs()
+        usb.device = usbHostDevice;
+      }
+      else
+      {
+        // Ok to downcast with static_cast because we know for sure that usb.device isn't pointing to a
+        // base-class object, and dynamic_cast wouldn't work anyway because compilation is done with -fno-rtti
+        usbHostDevice = static_cast<USBHostMSD*>(usb.device);
+      }
+      bool attachCallbackReturn = false;
+      if (CALLBACK_HOTPLUG == callbackType)
+      {
+        attachCallbackReturn = usbHostDevice->attach_detected_callback(callbackFunction);
+      }
+      else if (CALLBACK_UNPLUG == callbackType)
+      {
+        attachCallbackReturn = usbHostDevice->attach_removed_callback(callbackFunction);
+      }
+      else
+      {
+        // This should only happen if there's a bug in the code
+        attachCallbackReturn = false;
+      }
+      if (false == attachCallbackReturn)
+      {
+        deleteDevice(DEV_USB, &usb);
+        return EINVAL;
+      }
+      // Prevent multiple registrations
+      if (CALLBACK_HOTPLUG == callbackType)
+      {
+        hotplugCallbackAlreadyRegistered = true;
+      }
+      else if (CALLBACK_UNPLUG == callbackType)
+      {
+        unplugCallbackAlreadyRegistered = true;
+      }
+      else
+      {
+        // This should only happen if there's a bug in the code
+      }
+      return 0;
+
+      } // Curly braces necessary to keep new variables inside the case statement
+    default:
+      return ENOTBLK;
+  }
+}   // End of register_unplug_callback()
 
 }   // End of unnamed namespace
 
@@ -582,82 +676,17 @@ int umount(const enum StorageDevices deviceName)
 
 int register_hotplug_callback(const enum StorageDevices deviceName, void (* const callbackFunction)())
 {
-  if (true == hotplugCallbackAlreadyRegistered)
+  const int callbackReturn = register_callback(deviceName, callbackFunction, CALLBACK_HOTPLUG);
+  if (0 != callbackReturn)
   {
-    errno = EBUSY;
+    errno = callbackReturn;
     return -1;
   }
-  if (nullptr == callbackFunction)
+  else
   {
-    errno = EFAULT;
-    return -1;
+    return 0;
   }
-  switch (deviceName)
-  {
-    case DEV_SDCARD:    // There is no support for callbacks in the any of the SD Card block device classes
-      errno = ENOTSUP;
-      return -1;
-    case DEV_USB:
-      { // Curly braces necessary to keep new variables inside the case statement
-
-      // Determine if we're running on Machine Control or not on the first call to mount(), mkfs(), or
-      // register_hotplug_callback()  -->
-      if (false == hasMountedBefore)
-      {
-        hasMountedBefore = true;
-        if (BOARD_MACHINE_CONTROL == detectBoardType())
-        {
-          runningOnMachineControl = true;
-        }
-      }
-      // <--
-#if defined(ARDUINO_PORTENTA_H7_M7)
-      if (true == runningOnMachineControl)
-      {
-        // We need to apply power manually to the female USB A connector on the Machine Control
-        mbed::DigitalOut enablePower(PB_14, 0);
-      }
-#endif
-      // A USB mass storage device is already mounted at that mount point, or
-      // registered for the hotplug event
-      if (nullptr != usb.device)
-      {
-        errno = EBUSY;
-        return -1;
-      }
-      // We must create a USBHostMSD object to attach the callback to, but we
-      // don't create a file system object because we don't fully mount() anything
-      USBHostMSD *usbHostDevice = nullptr;
-      usbHostDevice = new(std::nothrow) USBHostMSD;
-      if (nullptr == usbHostDevice)
-      {
-        errno = ENOTBLK;
-        return -1;
-      }
-#if ((defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)))
-      // The Arduino_USBHostMbed5 library doesn't initialize the USB stack until
-      // the first connect() call because of an older bugfix (commit 72d0aa6), so
-      // we perform one connect() here to initialize the stack
-      usbHostDevice->connect();
-#endif
-      if (false == (usbHostDevice->attach_detected_callback(callbackFunction)))
-      {
-        deleteDevice(DEV_USB, &usb);
-        errno = EINVAL;
-        return -1;
-      }
-      // This is necessary for future calls to mount(), umount(), and mkfs()
-      usb.device = usbHostDevice;
-      // Prevent multiple registrations
-      hotplugCallbackAlreadyRegistered = true;
-      return 0;
-
-      } // Curly braces necessary to keep new variables inside the case statement
-    default:
-      errno = ENOTBLK;
-      return -1;
-  }        
-}   // End of hotplug_register_callback()
+}   // End of register_hotplug_callback()
 
 // Not supported by the layer below on these platforms, but might be on other platforms
 int deregister_hotplug_callback(const enum StorageDevices deviceName)
@@ -665,7 +694,29 @@ int deregister_hotplug_callback(const enum StorageDevices deviceName)
   (void) deviceName;    // Remove when implemented, only here to silence -Wunused-parameter
   errno = ENOSYS;
   return -1;
-}   // End of hotplug_deregister_callback()
+}   // End of deregister_hotplug_callback()
+
+int register_unplug_callback(const enum StorageDevices deviceName, void (* const callbackFunction)())
+{
+  const int callbackReturn = register_callback(deviceName, callbackFunction, CALLBACK_UNPLUG);
+  if (0 != callbackReturn)
+  {
+    errno = callbackReturn;
+    return -1;
+  }
+  else
+  {
+    return 0;
+  }
+}   // End of register__unplug_callback()
+
+// Not supported by the layer below on these platforms, but might be on other platforms
+int deregister_unplug_callback(const enum StorageDevices deviceName)
+{
+  (void) deviceName;    // Remove when implemented, only here to silence -Wunused-parameter
+  errno = ENOSYS;
+  return -1;
+}   // End of deregister_unplug_callback()
 
 /*
 *********************************************************************************************************
