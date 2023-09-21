@@ -24,7 +24,7 @@ enum TestTypes : uint8_t
 
 // !!! TEST CONFIGURATION !!! -->
 
-constexpr enum TestTypes selectedTest = TEST_PORTENTA_H7_USB;
+constexpr enum TestTypes selectedTest = TEST_PORTENTA_C33_SDCARD;
 
 // Notice that formtting tests can take a while to complete
 
@@ -477,7 +477,7 @@ void setup() {
   if (DEV_USB == deviceName)
   {
     // Register multiple callbacks test (unplug) -->
-    retVal = register_unplug_callback(DEV_USB, usbCallback);
+    retVal = register_unplug_callback(DEV_USB, usbCallback2);
     if ((-1 != retVal) || (EBUSY != errno))
     {
       allTestsOk = false;

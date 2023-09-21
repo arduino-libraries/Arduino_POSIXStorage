@@ -243,7 +243,7 @@ enum BoardTypes detectBoardType()
 void portentaMachineControlPowerHandling()
 {
   // Determine if we're running on Machine Control or not on the first call to mount(), mkfs(),
-  // register_hotplug_callback(), or register_unplug_callback()  -->
+  // register_hotplug_callback(), or register_unplug_callback()
   if (false == hasMountedBefore)
   {
     hasMountedBefore = true;
@@ -251,16 +251,15 @@ void portentaMachineControlPowerHandling()
     {
       runningOnMachineControl = true;
     }
-  }
-  // <--
 #if defined(ARDUINO_PORTENTA_H7_M7)
-  if (true == runningOnMachineControl)
-  {
-    // We need to apply power manually to the female USB A connector on the Machine Control
-    mbed::DigitalOut enablePower(PB_14, 0);
-  }
+    if (true == runningOnMachineControl)
+    {
+      // We need to apply power manually to the female USB A connector on the Machine Control
+      mbed::DigitalOut enablePower(PB_14, 0);
+    }
 #endif
-} // End of portentaMachineControl()
+  }
+} // End of portentaMachineControlPowerHandling()
 
 void deleteDevice(const enum StorageDevices deviceName, struct DeviceFileSystemCombination * const deviceFileSystemCombination)
 {
@@ -556,7 +555,7 @@ int register_callback(const enum StorageDevices deviceName, void (* const callba
         // base-class object, and dynamic_cast wouldn't work anyway because compilation is done with -fno-rtti
         usbHostDevice = static_cast<USBHostMSD*>(usb.device);
       }
-      bool attachCallbackReturn = false;
+      bool attachCallbackReturn;
       if (CALLBACK_HOTPLUG == callbackType)
       {
         attachCallbackReturn = usbHostDevice->attach_detected_callback(callbackFunction);
@@ -657,7 +656,7 @@ int umount(const enum StorageDevices deviceName)
     return -1;
   }
   // See note (1) at the bottom of the file
-  int unmountRet = deviceFileSystemCombination->fileSystem->unmount();
+  const int unmountRet = deviceFileSystemCombination->fileSystem->unmount();
   if (0 == unmountRet)
   {
     // Ok to delete with base class pointer because the destructor of the base class is virtual
@@ -682,13 +681,10 @@ int register_hotplug_callback(const enum StorageDevices deviceName, void (* cons
     errno = callbackReturn;
     return -1;
   }
-  else
-  {
-    return 0;
-  }
+  return 0;
 }   // End of register_hotplug_callback()
 
-// Not supported by the layer below on these platforms, but might be on other platforms
+// Currently not supported on any platform, but might be in the future
 int deregister_hotplug_callback(const enum StorageDevices deviceName)
 {
   (void) deviceName;    // Remove when implemented, only here to silence -Wunused-parameter
@@ -704,13 +700,10 @@ int register_unplug_callback(const enum StorageDevices deviceName, void (* const
     errno = callbackReturn;
     return -1;
   }
-  else
-  {
-    return 0;
-  }
-}   // End of register__unplug_callback()
+  return 0;
+}   // End of register_unplug_callback()
 
-// Not supported by the layer below on these platforms, but might be on other platforms
+// Currently not supported on any platform, but might be in the future
 int deregister_unplug_callback(const enum StorageDevices deviceName)
 {
   (void) deviceName;    // Remove when implemented, only here to silence -Wunused-parameter
