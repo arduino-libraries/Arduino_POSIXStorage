@@ -353,7 +353,7 @@ void setup() {
   if ((-1 != retVal) || (ENOSYS != errno))
   {
     allTestsOk = false;
-    Serial.println("[FAIL] Deregister callback not supported test failed");
+    Serial.println("[FAIL] Deregister callback not supported test failed (hotplug)");
   }
   // <-- Deregister callback not supported test (hotplug)
 
@@ -362,7 +362,7 @@ void setup() {
   if ((-1 != retVal) || (ENOSYS != errno))
   {
     allTestsOk = false;
-    Serial.println("[FAIL] Deregister callback not supported test failed");
+    Serial.println("[FAIL] Deregister callback not supported test failed (unplug)");
   }
   // <-- Deregister callback not supported test (unplug)
 
