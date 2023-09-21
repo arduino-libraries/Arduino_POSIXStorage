@@ -18,13 +18,13 @@ enum TestTypes : uint8_t
   TEST_PORTENTA_H7_USB,
   TEST_PORTENTA_MACHINE_CONTROL_SDCARD,
   TEST_PORTENTA_MACHINE_CONTROL_USB,
-  TEST_OPTA_SDCARD,
-  TEST_OPTA_USB
+  TEST_OPTA_SDCARD,   // Not currently implemented
+  TEST_OPTA_USB       // Logging to thumb drive
 };
 
 // !!! TEST CONFIGURATION !!! -->
 
-constexpr enum TestTypes selectedTest = TEST_PORTENTA_C33_USB;
+constexpr enum TestTypes selectedTest = TEST_PORTENTA_C33_SDCARD;
 
 // Notice that formtting tests can take a while to complete
 
@@ -77,13 +77,15 @@ void setup() {
   Serial.println("Testing started, please wait...");
   Serial.println();
 
-  if ((TEST_PORTENTA_MACHINE_CONTROL_SDCARD == selectedTest) || (TEST_OPTA_SDCARD == selectedTest))
+  if (TEST_PORTENTA_MACHINE_CONTROL_SDCARD == selectedTest)
   {
-    // Machine Control and Opta no SD Card supported test -->
+    // Machine Control no SD Card supported test -->
     retVal = mount(DEV_SDCARD, FS_FAT, MNT_DEFAULT);
     if ((-1 != retVal) || (ENOTBLK != errno))
     {
-      Serial.println("[FAIL] Machine Control and Opta no SD Card supported test failed");
+      Serial.println("[FAIL] Machine Control no SD Card supported test failed");
+      Serial.println();
+      Serial.println("FAILURE: Finished with errors (see list above for details)");
     }
     else
     {
@@ -91,8 +93,8 @@ void setup() {
       Serial.println();
       Serial.println("SUCCESS: Finished without errors");
       (void) umount(DEV_SDCARD);
-      for ( ; ; ) ;   // Stop testing here
     }
+    for ( ; ; ) ;   // Stop testing here
     // <-- Machine Control and Opta no SD Card supported test
   }
 
@@ -507,7 +509,7 @@ void setup() {
   // Opta final report -->
   if (TEST_OPTA_USB == selectedTest)
   {
-    (void) mount(deviceName, FS_FAT, MNT_DEFAULT);
+    (void) mount(DEV_USB, FS_FAT, MNT_DEFAULT);
     FILE *logFile = fopen("/usb/testlog.txt", "w");
     if (true == allTestsOk)
     {
@@ -519,7 +521,7 @@ void setup() {
       fprintf(logFile, "FAILURE: Finished with errors");
       fclose(logFile);      
     }
-    (void) umount(deviceName);
+    (void) umount(DEV_USB);
   }
   // <--
 }
