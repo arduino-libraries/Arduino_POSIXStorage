@@ -135,7 +135,7 @@ int mount(const enum StorageDevices deviceName,
 int umount(const enum StorageDevices deviceName);
 
 /**
-* @brief Register a hotplug callback function. Currently only supported for DEV_USB on Portenta C33.
+* @brief Register a hotplug callback function.
 * @param deviceName The device to register for: DEV_SDCARD or DEV_USB.
 * @param callbackFunction A function pointer to the callback.
 * @return On success: 0. On failure: -1 with an error code in the errno variable.
@@ -148,6 +148,21 @@ int register_hotplug_callback(const enum StorageDevices deviceName, void (* cons
 * @return On success: 0. On failure: -1 with an error code in the errno variable.
 */
 int deregister_hotplug_callback(const enum StorageDevices deviceName);
+
+/**
+* @brief Register an unplug callback function.
+* @param deviceName The device to register for: DEV_SDCARD or DEV_USB.
+* @param callbackFunction A function pointer to the callback.
+* @return On success: 0. On failure: -1 with an error code in the errno variable.
+*/
+int register_unplug_callback(const enum StorageDevices deviceName, void (* const callbackFunction)());
+
+/**
+* @brief Deregister a previously registered unplug callback function. Not currently supported on any platform.
+* @param deviceName The device to deregister for: DEV_SDCARD or DEV_USB.
+* @return On success: 0. On failure: -1 with an error code in the errno variable.
+*/
+int deregister_unplug_callback(const enum StorageDevices deviceName);
 
 /**
 * @brief Format a device (make file system).
