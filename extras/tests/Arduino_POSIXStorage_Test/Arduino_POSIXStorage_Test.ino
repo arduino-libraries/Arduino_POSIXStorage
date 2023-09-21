@@ -30,7 +30,7 @@ constexpr enum TestTypes selectedTest = TEST_PORTENTA_C33_SDCARD;
 
 // Uncomment the line below to include testing of LITTLEFS and FAT formatting with mkfs():
 
-#define PERFORM_FORMATTING_TESTS
+//#define PERFORM_FORMATTING_TESTS
 
 // <-- !!! TEST CONFIGURATION !!!
 
