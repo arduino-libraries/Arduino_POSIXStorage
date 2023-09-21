@@ -24,13 +24,13 @@ enum TestTypes : uint8_t
 
 // !!! TEST CONFIGURATION !!! -->
 
-constexpr enum TestTypes selectedTest = TEST_PORTENTA_C33_SDCARD;
+constexpr enum TestTypes selectedTest = TEST_PORTENTA_C33_USB;
 
 // Notice that formtting tests can take a while to complete
 
 // Uncomment the line below to include testing of LITTLEFS and FAT formatting with mkfs():
 
-//#define PERFORM_FORMATTING_TESTS
+#define PERFORM_FORMATTING_TESTS
 
 // <-- !!! TEST CONFIGURATION !!!
 
@@ -461,29 +461,33 @@ void setup() {
   (void) umount(deviceName);
   // <-- Persistent storage test
 
-  // Wait for USB thumb drive removal -->
-  if (DEV_USB == deviceName)
+  // These tests can't be performed on the Opta because we log to USB
+  if (TEST_OPTA_USB != selectedTest)
   {
-    Serial.println();
-    Serial.println("Please remove the thumb drive");
-    (void) register_unplug_callback(DEV_USB, usbCallback2);
-    while (false == usbDetached) {
-      delay(500);
-    }
-    Serial.println("Thank you!");
-  }
-  // <-- Wait for USB thumb drive removal
-
-  if (DEV_USB == deviceName)
-  {
-    // Register multiple callbacks test (unplug) -->
-    retVal = register_unplug_callback(DEV_USB, usbCallback2);
-    if ((-1 != retVal) || (EBUSY != errno))
+    // Wait for USB thumb drive removal -->
+    if (DEV_USB == deviceName)
     {
-      allTestsOk = false;
-      Serial.println("[FAIL] Register multiple callbacks test failed (unplug)");
+      Serial.println();
+      Serial.println("Please remove the thumb drive");
+      (void) register_unplug_callback(DEV_USB, usbCallback2);
+      while (false == usbDetached) {
+        delay(500);
+      }
+      Serial.println("Thank you!");
     }
-    // <-- Register multiple callbacks test (unplug)
+    // <-- Wait for USB thumb drive removal
+
+    if (DEV_USB == deviceName)
+    {
+      // Register multiple callbacks test (unplug) -->
+      retVal = register_unplug_callback(DEV_USB, usbCallback2);
+      if ((-1 != retVal) || (EBUSY != errno))
+      {
+        allTestsOk = false;
+        Serial.println("[FAIL] Register multiple callbacks test failed (unplug)");
+      }
+      // <-- Register multiple callbacks test (unplug)
+    }
   }
 
   // Final report -->
