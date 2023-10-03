@@ -26,7 +26,7 @@ enum TestTypes : uint8_t
 
 constexpr enum TestTypes selectedTest = TEST_PORTENTA_C33_SDCARD;
 
-// Notice that formtting tests can take a while to complete
+// Notice that formatting tests can take a while to complete
 
 // Uncomment the line below to include testing of LITTLEFS and FAT formatting with mkfs():
 
