@@ -46,7 +46,7 @@ jobs:
         # Step 4: Delete the release if the versions don't match
       - name: Delete release if failed
         if: ${{ steps.compare_version.outputs.version != steps.get_latest_release.outputs.release }}
-        uses: dev-drprasad/delete-tag-and-release@v0.2.1
+        uses: dev-drprasad/delete-tag-and-release@v1.0.1
         with:
           tag_name: ${{ steps.get_latest_release.outputs.release }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
