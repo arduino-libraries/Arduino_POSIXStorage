@@ -224,7 +224,11 @@ enum BoardTypes detectBoardType()
 {
 #if defined(ARDUINO_PORTENTA_C33)
   return BOARD_PORTENTA_C33;
-#elif defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
+#elif defined(ARDUINO_OPTA)
+  // This case must be handled separately, because PB14 that enables USB on the PMC is used for RS485 on the Opta,
+  // so performing automatic detection on the Opta breaks RS485
+  return BOARD_PORTENTA_H7;
+#elif defined(ARDUINO_PORTENTA_H7_M7)
   #if (defined(AUTOMATIC_OVERRIDE_PORTENTA_H7) && defined(AUTOMATIC_OVERRIDE_PORTENTA_MACHINE_CONTROL))
     #error "You have defined AUTOMATIC_OVERRIDE_PORTENTA_H7 and AUTOMATIC_OVERRIDE_PORTENTA_MACHINE_CONTROL at the same time"
   #endif
