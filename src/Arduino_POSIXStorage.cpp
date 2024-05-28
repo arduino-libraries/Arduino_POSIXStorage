@@ -69,7 +69,7 @@
   #include <Arduino_USBHostMbed5.h>
   #include <BlockDevice.h>
 #else
-  #error "The POSIXStorage library does not support this board"
+  #error "The Arduino_POSIXStorage library does not support this board"
 #endif
 
 /*
