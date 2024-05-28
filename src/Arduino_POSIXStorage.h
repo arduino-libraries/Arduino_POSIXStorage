@@ -57,7 +57,7 @@
 *********************************************************************************************************
 */
 
-// These are necesssary to expose to the sketch to get the retargeting from mbed -->
+// These are necessary to expose to the sketch to get the retargeting from mbed -->
 
 #if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
   #include <mbed.h>
@@ -74,7 +74,7 @@
 *********************************************************************************************************
 */
 
-// These are necesssary to expose to the sketch to get the retargeting from mbed -->
+// These are necessary to expose to the sketch to get the retargeting from mbed -->
 
 #if defined(ARDUINO_PORTENTA_H7_M7) || defined(ARDUINO_OPTA)
   using mbed::FATFileSystem;

@@ -1,6 +1,6 @@
 /*
  *
- * POSIXStorage Tests
+ * Arduino_POSIXStorage Tests
  *
  * Original Author: A. Vidstrom (Arduino SA. http://arduino.cc)
  *
