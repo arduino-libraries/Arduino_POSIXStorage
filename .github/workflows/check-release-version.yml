@@ -33,7 +33,7 @@ jobs:
       - name: Check version in library.properties
         id: compare_version
         run: |
-          version=$(cat library.properties | grep "version" | cut -d'=' -f2)
+          version=v$(cat library.properties | grep "version" | cut -d'=' -f2)
           echo "Version in library.properties: $version"
           echo "Version in release: ${{ steps.get_latest_release.outputs.release }}"
           if [ "$version" == "${{ steps.get_latest_release.outputs.release }}" ]; then
